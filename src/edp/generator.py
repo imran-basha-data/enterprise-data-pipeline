@@ -260,7 +260,8 @@ class _Generator:
     def __init__(self, config: GeneratorConfig, output_dir: Path) -> None:
         self.cfg = config
         self.out = output_dir
-        self.rng = random.Random(config.seed)  # nosec B311 - synthetic data, not security
+        # Seeded PRNG: reproducible synthetic data, not a security use.
+        self.rng = random.Random(config.seed)  # nosec B311
         self.manifest = GenerationManifest(seed=config.seed, batches=config.batches)
         self.products: list[_Product] = []
         self.supplier_lead: dict[str, int] = {s[0]: s[3] for s in _SUPPLIERS}
@@ -346,9 +347,9 @@ class _Generator:
             planned_qty = self.rng.choice([20, 40, 50, 80, 100, 150, 200, 250])
             planned_start = day + timedelta(hours=6 + self.rng.randint(0, 12))
             duration = timedelta(hours=self.rng.randint(4, 36))
-            delay = timedelta(minutes=int(max(-120, min(720, self.rng.gauss(60, 150)))))
+            delay = timedelta(minutes=int(max(-120, min(600, self.rng.gauss(15, 90)))))
             actual_start = planned_start + delay
-            actual_end = actual_start + duration * self.rng.uniform(0.9, 1.35)
+            actual_end = actual_start + duration * self.rng.uniform(0.85, 1.2)
             actual_end = actual_end.replace(microsecond=0, second=0)
             self.orders.append(
                 _Order(
