@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enterprise-data-pipeline"
+version = "0.1.0"
+description = "Manufacturing and supply-chain analytics pipeline: ingestion, data quality, PostgreSQL models and KPI reporting."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Mohd Imran Basha" }]
+requires-python = ">=3.11"
+dependencies = [
+    "psycopg[binary]>=3.2,<4",
+    "tzdata>=2024.1",
+]
+
+[project.scripts]
+edp = "edp.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+edp = ["sql/**/*.sql"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "integration: requires a PostgreSQL database (EDP_TEST_DATABASE_URL)",
+]
+
+[tool.coverage.run]
+source = ["edp"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["edp"]
+known-local-folder = ["conftest", "factories", "test_ingestion"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF", "PL", "C4"]
+ignore = [
+    "PLR0913",  # pipeline functions legitimately take several collaborators
+    "PLR2004",  # magic values in tests and business thresholds are explicit
+    "PLR0911",
+    "PLR0912",
+    "PLR0915",
+    "PLR0917",
+    "S608",     # SQL is composed with psycopg.sql.Identifier, never string input
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S311", "PLC0415"]
+"src/edp/generator.py" = ["S311"]  # random is used for synthetic data, not security
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+files = ["src/edp"]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
