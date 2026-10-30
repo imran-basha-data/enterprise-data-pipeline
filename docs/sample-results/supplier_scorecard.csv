@@ -1,0 +1,13 @@
+supplier_id,supplier_name,country_code,contracted_lead_time_days,deliveries,on_time_pct,in_full_pct,otif_pct,avg_lead_time_days,avg_days_late_when_late,defect_rate_pct,open_shipments,open_overdue
+SUP-005,Severn Hydraulic Systems,GB,9,29,79.31,41.38,34.48,8.93,4.17,2.52,2,0
+SUP-011,Kestrel Industrial Supply,IE,9,83,79.52,43.37,34.94,8.98,3.35,2.29,9,1
+SUP-008,Iberia Alloys,ES,18,40,75.00,67.50,50.00,17.55,4.10,1.85,14,0
+SUP-003,Brightwater Electronics,GB,10,42,78.57,64.29,52.38,10.33,5.44,2.01,5,0
+SUP-009,Vistula Cable Works,PL,12,19,84.21,84.21,68.42,11.89,4.67,1.21,4,0
+SUP-006,Tynebridge Sensor Works,GB,8,62,90.32,87.10,77.42,7.58,5.33,1.55,3,0
+SUP-004,Pennine Polymers,GB,6,32,87.50,96.88,84.38,5.78,5.00,1.27,1,0
+SUP-012,Brabant Measurement Systems,NL,11,47,95.74,89.36,85.11,10.21,6.00,1.06,6,0
+SUP-001,Northgate Precision Castings,GB,7,55,92.73,92.73,85.45,6.55,5.00,1.01,8,0
+SUP-010,Ashby Metal Pressings,GB,6,81,95.06,91.36,86.42,5.30,3.50,0.84,5,1
+SUP-007,Lindenhof Komponenten,DE,14,62,93.55,93.55,87.10,13.24,3.25,0.60,12,0
+SUP-002,Calder Valley Fasteners,GB,5,48,97.92,93.75,91.67,4.19,4.00,0.42,1,0

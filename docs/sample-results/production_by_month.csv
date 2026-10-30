@@ -1,0 +1,13 @@
+month,category,orders_completed,produced_units,plan_attainment_pct,scrap_rate_pct,on_time_completion_pct,avg_cycle_hours
+2026-01,Electrical Assemblies,98,10685,94.73,2.27,34.69,20.9
+2026-01,Hydraulic Components,98,10347,95.10,2.00,40.82,21.3
+2026-01,Sensors,113,11966,95.73,2.33,37.17,20.1
+2026-02,Electrical Assemblies,111,12151,95.68,2.24,36.94,21.0
+2026-02,Hydraulic Components,109,11412,95.74,2.11,40.37,20.5
+2026-02,Sensors,94,8995,95.49,1.97,43.62,17.9
+2026-03,Electrical Assemblies,122,12170,95.08,2.06,40.98,21.7
+2026-03,Hydraulic Components,115,11407,95.62,1.77,35.65,21.6
+2026-03,Sensors,137,14957,95.45,1.95,37.96,20.9
+2026-04,Electrical Assemblies,21,2312,97.55,2.12,28.57,17.6
+2026-04,Hydraulic Components,17,1693,92.51,2.70,35.29,23.2
+2026-04,Sensors,9,1302,94.35,1.21,88.89,21.1

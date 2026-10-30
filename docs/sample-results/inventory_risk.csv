@@ -1,0 +1,36 @@
+product_id,product_name,warehouse_id,on_hand,reorder_point,avg_daily_issue_30d,days_of_cover,is_stockout
+PRD-0020,Lock Nut M10 LNM-200,WH-BHM,-231,120,11.53,0.0,True
+PRD-0024,Anchor Bolt AB-200,WH-MAN,-207,200,18.03,0.0,True
+PRD-0036,Aluminium Bar AB-200,WH-MAN,-55,50,2.83,0.0,True
+PRD-0007,Hose Assembly HA-100,WH-GLA,-49,300,15.53,0.0,True
+PRD-0003,Pressure Relief Valve PRV-100,WH-BRS,0,300,3.30,0.0,True
+PRD-0016,Power Supply Unit PSU-200,WH-BRS,0,300,1.67,0.0,True
+PRD-0018,Hex Bolt M12 HBM-200,WH-LDS,0,120,3.07,0.0,True
+PRD-0023,Anchor Bolt AB-100,WH-LDS,0,300,10.50,0.0,True
+PRD-0024,Anchor Bolt AB-200,WH-BRS,0,200,5.80,0.0,True
+PRD-0032,Pressure Transducer PT-200,WH-BRS,0,300,16.50,0.0,True
+PRD-0033,Steel Sheet 2mm SS2-100,WH-BRS,0,300,8.50,0.0,True
+PRD-0033,Steel Sheet 2mm SS2-100,WH-MAN,0,300,0.73,0.0,True
+PRD-0035,Aluminium Bar AB-100,WH-GLA,0,80,0.07,0.0,True
+PRD-0038,Copper Wire CW-200,WH-GLA,0,50,3.97,0.0,True
+PRD-0040,Polymer Granulate PG-200,WH-GLA,0,300,9.87,0.0,True
+PRD-0002,Hydraulic Pump HP-200,WH-BRS,0,80,0.00,,True
+PRD-0003,Pressure Relief Valve PRV-100,WH-GLA,0,300,0.00,,True
+PRD-0017,Hex Bolt M12 HBM-100,WH-BHM,0,50,0.00,,True
+PRD-0013,Motor Controller MC-100,WH-GLA,8,300,11.70,0.7,False
+PRD-0038,Copper Wire CW-200,WH-LDS,7,50,3.87,1.8,False
+PRD-0036,Aluminium Bar AB-200,WH-LDS,5,50,1.53,3.3,False
+PRD-0006,Hydraulic Cylinder HC-200,WH-BRS,138,300,21.03,6.6,False
+PRD-0023,Anchor Bolt AB-100,WH-BHM,70,300,8.97,7.8,False
+PRD-0033,Steel Sheet 2mm SS2-100,WH-LDS,154,300,16.63,9.3,False
+PRD-0018,Hex Bolt M12 HBM-200,WH-BHM,89,120,9.17,9.7,False
+PRD-0033,Steel Sheet 2mm SS2-100,WH-GLA,74,300,7.13,10.4,False
+PRD-0013,Motor Controller MC-100,WH-LDS,115,300,8.10,14.2,False
+PRD-0008,Hose Assembly HA-200,WH-BRS,252,300,16.17,15.6,False
+PRD-0030,Flow Meter FM-200,WH-BRS,176,200,10.57,16.7,False
+PRD-0039,Polymer Granulate PG-100,WH-GLA,107,200,5.13,20.8,False
+PRD-0025,Proximity Sensor PS-100,WH-BRS,245,300,9.70,25.3,False
+PRD-0024,Anchor Bolt AB-200,WH-BHM,148,200,5.80,25.5,False
+PRD-0032,Pressure Transducer PT-200,WH-GLA,232,300,8.73,26.6,False
+PRD-0023,Anchor Bolt AB-100,WH-MAN,62,300,1.40,44.3,False
+PRD-0040,Polymer Granulate PG-200,WH-MAN,95,300,0.00,,False
