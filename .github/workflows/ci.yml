@@ -114,7 +114,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Build image
-        run: docker compose build
+        run: docker compose --profile demo build
       - name: Image runs as a non-root user
         run: |
           uid=$(docker run --rm --entrypoint id enterprise-data-pipeline:local -u)
