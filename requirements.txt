@@ -1,0 +1,5 @@
+# Runtime dependencies (pinned). Regenerate deliberately; CI audits these pins.
+psycopg[binary]==3.3.6
+psycopg-binary==3.3.6
+tzdata==2026.6
+typing_extensions==4.16.0
