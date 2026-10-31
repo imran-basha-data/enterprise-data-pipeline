@@ -1,0 +1,2 @@
+as_of_date,units_produced,plan_attainment_pct,scrap_rate_pct,on_time_completion_pct,shipments_delivered,supplier_otif_pct,avg_supplier_lead_time_days,inventory_value,stockout_positions,below_reorder_positions,quarantine_rate_pct
+2026-04-04,109397,95.39,2.08,38.79,600,70.67,8.85,48688778.33,18,35,2.46
