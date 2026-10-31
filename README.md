@@ -2,7 +2,7 @@
 
 Batch data pipeline for manufacturing and supply-chain analytics, built with Python and PostgreSQL.
 
-> **Status:** the ingestion and data-quality layer is in place. Analytical models, KPI reporting and full documentation follow in later pull requests.
+> **Status:** ingestion, data quality, the analytical star schema, KPI reporting and Docker packaging are in place. Full documentation follows in the next pull request.
 
 ## What it does today
 
@@ -11,6 +11,8 @@ Batch data pipeline for manufacturing and supply-chain analytics, built with Pyt
 - **Quarantines** bad records with their original payload and every reason code, instead of dropping them silently.
 - **Loads incrementally and idempotently.** A file manifest keyed by SHA-256 means re-running never reloads a file. Record-level upserts only overwrite with a newer `updated_at`, so out-of-order files cannot roll data back.
 - **Recovers from failures.** Each file loads in a single transaction. Transient database errors are retried with backoff, and an advisory lock stops two runs from executing at once.
+- **Models** staging data into a star schema (`mart.dim_*`, `mart.fact_*`) incrementally, using per-model change-sequence watermarks. A **quality gate** reconciles marts with staging and rolls the refresh back if they disagree.
+- **Reports KPIs:** production plan attainment, scrap and on-time completion; supplier OTIF, lead time and defect rate; shipment delays; inventory position and days of cover. Output is CSV plus a Markdown summary.
 - **Generates realistic synthetic data** with a known number of injected defects, so the tests can prove that every defect is caught.
 
 ## Quick start
@@ -22,7 +24,15 @@ cp .env.example .env   # then set EDP_DATABASE_URL to a PostgreSQL 16 database
 set -a && source .env && set +a
 
 edp generate        # writes synthetic files to data/landing
-edp run             # applies migrations, then ingests new files
+edp run             # applies migrations, ingests new files, refreshes marts
+edp report          # writes reports/kpi_report.md and CSV extracts
+```
+
+Or with Docker only:
+
+```bash
+cp .env.example .env && mkdir -p data/landing reports   # set POSTGRES_PASSWORD; on Linux set HOST_UID/HOST_GID
+docker compose --profile demo up --exit-code-from demo demo
 ```
 
 ## Tests

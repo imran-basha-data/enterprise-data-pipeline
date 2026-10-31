@@ -1,0 +1,63 @@
+# Local stack: PostgreSQL plus a one-shot pipeline container.
+#
+#   cp .env.example .env            # set POSTGRES_PASSWORD (and HOST_UID/HOST_GID on Linux)
+#   mkdir -p data/landing reports
+#   docker compose up -d postgres
+#   docker compose run --rm pipeline generate
+#   docker compose run --rm pipeline run
+#   docker compose run --rm pipeline report
+#
+# Or run all three steps in one go:  docker compose up --exit-code-from demo demo
+
+name: enterprise-data-pipeline
+
+x-pipeline: &pipeline
+  build: .
+  image: enterprise-data-pipeline:local
+  # Run as your own user so files written to the bind mounts are yours.
+  # Set HOST_UID/HOST_GID in .env (e.g. from `id -u` / `id -g`); defaults to the image user.
+  user: "${HOST_UID:-10001}:${HOST_GID:-10001}"
+  environment:
+    EDP_DATABASE_URL: postgresql://edp:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/edp
+    EDP_LOG_FORMAT: ${EDP_LOG_FORMAT:-json}
+    EDP_SOURCE_TIMEZONE: ${EDP_SOURCE_TIMEZONE:-Europe/London}
+  volumes:
+    - ./data/landing:/data/landing
+    - ./reports:/data/reports
+  depends_on:
+    postgres:
+      condition: service_healthy
+  read_only: true
+  tmpfs: [/tmp]
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: edp
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: edp
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edp -d edp"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pipeline:
+    <<: *pipeline
+    profiles: [tools]
+
+  demo:
+    <<: *pipeline
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["edp generate && edp run && edp report"]
+    profiles: [demo]
+
+volumes:
+  pgdata:

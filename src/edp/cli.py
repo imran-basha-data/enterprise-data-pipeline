@@ -15,6 +15,7 @@ from edp.db import MigrationError, PipelineLockedError, apply_migrations
 from edp.generator import GeneratorConfig, generate
 from edp.logging_setup import configure_logging, get_logger
 from edp.pipeline import run_pipeline
+from edp.reporting import generate_report
 
 EXIT_OK = 0
 EXIT_FAILED = 1
@@ -47,6 +48,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     run = sub.add_parser("run", help="Ingest new files and refresh models.")
     run.add_argument("--landing-dir", type=Path, default=None)
+    run.add_argument(
+        "--full-refresh",
+        action="store_true",
+        help="Rebuild all marts from staging instead of loading incrementally.",
+    )
+
+    rep = sub.add_parser("report", help="Write KPI CSVs and a Markdown report.")
+    rep.add_argument("--output", type=Path, default=None, help="Defaults to EDP_REPORT_DIR.")
     return parser
 
 
@@ -103,11 +112,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             settings = Settings(**{**settings.__dict__, "landing_dir": args.landing_dir})
         apply_migrations(settings.database_url)
         try:
-            summary = run_pipeline(settings)
+            summary = run_pipeline(settings, full_refresh=args.full_refresh)
         except PipelineLockedError as exc:
             log.error("run_locked", extra={"fields": {"error": str(exc)}})
             return EXIT_LOCKED
         return EXIT_OK if summary.status == "succeeded" else EXIT_FAILED
+
+    if args.command == "report":
+        path = generate_report(settings.database_url, args.output or settings.report_dir)
+        log.info("report_written", extra={"fields": {"path": str(path)}})
+        print(path)
+        return EXIT_OK
 
     return EXIT_FAILED  # pragma: no cover
 

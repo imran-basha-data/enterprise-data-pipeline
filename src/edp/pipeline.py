@@ -14,8 +14,10 @@ from edp.config import Settings
 from edp.db import connect, pipeline_lock
 from edp.ingest import Checkpoint, FileResult, ingest_file
 from edp.logging_setup import get_logger
+from edp.quality import CheckResult, QualityGateError, record_checks, run_dataset_checks
 from edp.readers import LandedFile, discover_files
 from edp.retry import retry_call
+from edp.transform import ModelResult, refresh_models
 
 log = get_logger(__name__)
 
@@ -27,6 +29,8 @@ class RunSummary:
     files_discovered: int = 0
     files: list[FileResult] = field(default_factory=list)
     ignored_files: list[str] = field(default_factory=list)
+    models: list[ModelResult] = field(default_factory=list)
+    checks: list[CheckResult] = field(default_factory=list)
     error: str | None = None
 
     def count(self, status: str) -> int:
@@ -40,6 +44,11 @@ class RunSummary:
     def records_quarantined(self) -> int:
         return sum(f.rows_quarantined for f in self.files)
 
+    @property
+    def quarantine_rate(self) -> float:
+        read = sum(f.rows_read for f in self.files if f.status != "skipped")
+        return self.records_quarantined / read if read else 0.0
+
 
 def run_pipeline(
     settings: Settings,
@@ -47,13 +56,15 @@ def run_pipeline(
     now: datetime | None = None,
     checkpoint: Checkpoint | None = None,
     sleep: Callable[[float], None] = time.sleep,
+    full_refresh: bool = False,
 ) -> RunSummary:
     """Execute one pipeline run and return its summary.
 
     Raises ``PipelineLockedError`` if another run holds the lock. Any other
     failure is recorded against the run and reflected in ``status``; files
     committed before the failure stay committed, and the next run resumes
-    from the first file that did not complete.
+    from the first file that did not complete. Marts are only published when
+    every blocking data-quality check passes.
     """
     now = now or datetime.now(UTC)
     with pipeline_lock(settings.database_url) as lock_conn:
@@ -79,12 +90,34 @@ def run_pipeline(
                         description=f"ingest {landed.name}",
                     )
                 )
+            summary.models, summary.checks = retry_call(
+                lambda: _publish_models(settings, summary, full_refresh),
+                attempts=settings.max_retries,
+                base_delay_s=settings.retry_base_delay_s,
+                sleep=sleep,
+                description="refresh models",
+            )
             summary.status = "succeeded"
+        except QualityGateError as exc:
+            summary.checks = exc.results
+            summary.status = "failed"
+            summary.error = str(exc)
+            log.error(
+                "quality_gate_failed",
+                extra={
+                    "fields": {
+                        "run_id": summary.run_id,
+                        "failed_checks": [c.name for c in exc.failures],
+                    }
+                },
+            )
         except Exception as exc:
             summary.status = "failed"
             summary.error = f"{type(exc).__name__}: {exc}"
             log.exception("run_failed", extra={"fields": {"run_id": summary.run_id}})
         finally:
+            if summary.checks:
+                record_checks(lock_conn, summary.run_id, summary.checks)
             _finish_run(lock_conn, summary)
     log.info(
         "run_finished",
@@ -113,6 +146,24 @@ def _load_file(
     # A fresh connection per attempt means a retry never reuses a broken one.
     with connect(settings.database_url) as conn, conn.transaction():
         return ingest_file(conn, landed, run_id, settings, now, checkpoint)
+
+
+def _publish_models(
+    settings: Settings, summary: RunSummary, full_refresh: bool
+) -> tuple[list[ModelResult], list[CheckResult]]:
+    """Refresh marts and run the quality gate in one transaction."""
+    with connect(settings.database_url) as conn, conn.transaction():
+        models = refresh_models(conn, settings.source_timezone, full_refresh=full_refresh)
+        checks = run_dataset_checks(conn, summary.quarantine_rate)
+        if any(c.blocking_failure for c in checks):
+            raise QualityGateError(checks)  # rolls back the model refresh
+    for check in checks:
+        if not check.passed:
+            log.warning(
+                "dq_check_warning",
+                extra={"fields": {"check": check.name, "observed": check.observed}},
+            )
+    return models, checks
 
 
 def _mark_abandoned_runs(conn: psycopg.Connection) -> None:
